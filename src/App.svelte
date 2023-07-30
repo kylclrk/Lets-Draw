@@ -68,51 +68,63 @@
   }
 </script>
 
-<div class="floating-controls">
-  <button on:click={reset}>Reset</button>
-  <DrawModeButton bind:drawMode mode="FREE">Free Mode</DrawModeButton>
-  <DrawModeButton bind:drawMode mode="FREE-LINE">Free Line</DrawModeButton>
-  <DrawModeButton bind:drawMode mode="LINE">Line Mode</DrawModeButton>
-  <label for="color">Color</label>
-  <input id="color" type="color" bind:value={selectedColor} />
-  <label for="background">Background</label>
-  <input id="background" type="color" bind:value={backgroundColor} />
-</div>
+<div class="container">
+  <div class="floating-controls">
+    <button on:click={reset}>Reset</button>
+    <DrawModeButton bind:drawMode mode="FREE">Free Mode</DrawModeButton>
+    <DrawModeButton bind:drawMode mode="FREE-LINE">Free Line</DrawModeButton>
+    <DrawModeButton bind:drawMode mode="LINE">Line Mode</DrawModeButton>
+    <br />
+    <label for="color">
+      Color
+      <input id="color" type="color" bind:value={selectedColor} />
+    </label>
+    <label for="background">
+      Background
+      <input id="background" type="color" bind:value={backgroundColor} />
+    </label>
+  </div>
 
-<div style="background-color: {backgroundColor}">
-  <Stage
-    config={{ width, height }}
-    on:mousedown={onMouseDown}
-    on:touchstart={onMouseDown}
-    on:mousemove={onMouseMove}
-    on:touchmove={onMouseMove}
-    on:mouseup={onMouseUp}
-    on:touchend={onMouseUp}
-    bind:handle={stage}
-  >
-    <Layer>
-      {#each lines as l}
-        <Line
-          config={{}}
-          bind:handle={l.line}
-          on:click={() => {
-            console.log(l.meta.time);
-          }}
-        />
-      {/each}
-    </Layer>
-  </Stage>
+  <div style="background-color: {backgroundColor}">
+    <Stage
+      config={{ width, height }}
+      on:mousedown={onMouseDown}
+      on:touchstart={onMouseDown}
+      on:mousemove={onMouseMove}
+      on:touchmove={onMouseMove}
+      on:mouseup={onMouseUp}
+      on:touchend={onMouseUp}
+      bind:handle={stage}
+    >
+      <Layer>
+        {#each lines as l}
+          <Line
+            config={{}}
+            bind:handle={l.line}
+            on:click={() => {
+              console.log(l.meta.time);
+            }}
+          />
+        {/each}
+      </Layer>
+    </Stage>
+  </div>
 </div>
 
 <svelte:window bind:innerWidth={width} bind:innerHeight={height} />
 
 <style>
+  .container {
+    position: relative;
+    overscroll-behavior: none;
+  }
   .floating-controls {
     position: absolute;
     top: 8px;
     left: 8px;
     z-index: 100;
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
   }
 
