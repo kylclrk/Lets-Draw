@@ -15,16 +15,17 @@
   let height: number;
 
   let drawMode: DrawMode = "LINE";
-  let selectedColor: Writable<string> = setContext("selectedColor", writable("#F1F1F1"));
+  let selectedColor: Writable<string> = setContext(
+    "selectedColor",
+    writable("#F1F1F1")
+  );
   let backgroundColor: string = "#1E1E1E";
 
   function reset() {
     $data = [];
   }
 
-  // let events: CanvasEvents;
-
-  const events: Writable<CanvasEvents> = setContext(
+  setContext(
     "canvas-events",
     writable({ handleDown: () => {}, handleMove: () => {}, handleUp: () => {} })
   );
@@ -36,7 +37,9 @@
     <DrawModeButton bind:drawMode mode="FREE">Free Mode</DrawModeButton>
     <DrawModeButton bind:drawMode mode="FREE-LINE">Free Line</DrawModeButton>
     <DrawModeButton bind:drawMode mode="LINE">Line Mode</DrawModeButton>
-    <DrawModeButton bind:drawMode mode="RECTANGLE">Rectangle Mode</DrawModeButton>
+    <DrawModeButton bind:drawMode mode="RECTANGLE"
+      >Rectangle Mode</DrawModeButton
+    >
     <br />
     <label for="color">
       Color
@@ -58,7 +61,7 @@
     <RectangleTool />
   {/if}
   <div style="background-color: {backgroundColor}">
-    <Canvas events={$events} {width} {height}>
+    <Canvas {width} {height}>
       <Layer>
         {#each $data as item}
           <svelte:component this={item.shape} config={item.config} />
