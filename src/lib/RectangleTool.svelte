@@ -1,59 +1,49 @@
 <script lang="ts">
-  import Konva from "konva";
-  import DrawModeButton from "../DrawModeButton.svelte";
-  import type { DrawMode, RectangleWithData } from "../types";
+  import type { CanvasEvents, ShapeWithData } from "../types";
   import { getContext } from "svelte";
   import type { Writable } from "svelte/store";
+  import { data, stage } from "./stores";
+  import { Rect } from "svelte-konva";
 
-  export let stage: Konva.Stage;
-  export let layer: Konva.Layer;
-  export let drawMode: DrawMode;
   const selectedColor = getContext<Writable<string>>("selectedColor");
+  const events = getContext<Writable<CanvasEvents>>("canvas-events");
+
   let isPainting: boolean = false;
-  let workingRect: RectangleWithData;
+  let workingRect: ShapeWithData;
 
-  const clickHandler = () => {
-    stage.removeEventListener("mousedown touchstart mousemove touchmove mouseup touchend");
-    stage.on("mousedown touchstart", onMouseDown);
-    stage.on("mousemove touchmove", onMouseMove);
-    stage.on("mouseup touchend", onMouseUp);
+  $events = {
+    handleDown() {
+      isPainting = true;
+      const pos = $stage.getPointerPosition();
+
+      workingRect = {
+        config: {
+          stroke: $selectedColor,
+          strokeWidth: 3,
+          x: pos.x,
+          y: pos.y,
+          width: 0,
+          height: 0,
+        },
+        shape: Rect,
+        meta: "It's a rectangle!",
+      };
+      $data = [...$data, workingRect];
+    },
+
+    handleMove() {
+      if (!isPainting) {
+        return;
+      }
+      const pos = $stage.getPointerPosition();
+
+      workingRect.config.width = pos.x - workingRect.config.x;
+      workingRect.config.height = pos.y - workingRect.config.y;
+      $data = $data;
+    },
+
+    handleUp() {
+      isPainting = false;
+    },
   };
-
-  function onMouseDown() {
-    isPainting = true;
-    const pos = stage.getPointerPosition();
-
-    workingRect = {
-      rectangle: new Konva.Rect({
-        stroke: $selectedColor,
-        strokeWidth: 3,
-        x: pos.x,
-        y: pos.y,
-        width: 1,
-        height: 1,
-      }),
-      // We can put whatever data we want about the line here.
-      meta: {
-        time: new Date(),
-      },
-    };
-
-    layer.add(workingRect.rectangle);
-  }
-
-  function onMouseMove() {
-    if (!isPainting) {
-      return;
-    }
-    const pos = stage.getPointerPosition();
-
-    workingRect.rectangle.width(pos.x - workingRect.rectangle.width());
-    workingRect.rectangle.height(pos.y - workingRect.rectangle.height());
-  }
-
-  function onMouseUp() {
-    isPainting = false;
-  }
 </script>
-
-<DrawModeButton bind:drawMode {clickHandler} mode="RECTANGLE">Rectangle Tool</DrawModeButton>

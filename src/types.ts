@@ -1,16 +1,13 @@
-import { Line } from '../node_modules/konva/lib/shapes/Line';
-import { Rect } from '../node_modules/konva/lib/shapes/Rect';
+import type { LineConfig } from 'konva/lib/shapes/Line';
+import type { RectConfig } from 'konva/lib/shapes/Rect';
+import type { Line, Rect } from 'svelte-konva';
 
 export type DrawMode = "FREE" | "LINE" | "FREE-LINE" | "RECTANGLE" | "SELECT";
 
-export type LineWithData = {
-  line: Line;
+export type ShapeWithData = {
   meta: any;
-}
-
-export type RectangleWithData = {
-  rectangle: Rect;
-  meta: any;
+  shape: Line['default'] | Rect['default'];
+  config: LineConfig | RectConfig;
 }
 
 export type CanvasEvents = {

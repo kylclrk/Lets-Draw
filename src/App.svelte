@@ -1,20 +1,20 @@
 <script lang="ts">
-  import { Layer, Line, Stage } from "svelte-konva";
-  import type { CanvasEvents, DrawMode, LineWithData } from "./types";
+  import { Layer } from "svelte-konva";
+  import type { CanvasEvents, DrawMode } from "./types";
   import { writable, type Writable } from "svelte/store";
   import { setContext } from "svelte";
   import FreeTool from "./lib/FreeTool.svelte";
-  import { data, stage } from "./lib/stores";
+  import { data } from "./lib/stores";
   import DrawModeButton from "./DrawModeButton.svelte";
   import LineTool from "./lib/LineTool.svelte";
+  import FreeLineTool from "./lib/FreeLineTool.svelte";
+  import RectangleTool from "./lib/RectangleTool.svelte";
+  import Canvas from "./lib/Canvas.svelte";
 
-  let lines: LineWithData[] = [];
-
-  // let stage: Konva.Stage;
   let width: number;
   let height: number;
 
-  let drawMode: DrawMode = "SELECT";
+  let drawMode: DrawMode = "LINE";
   let selectedColor: Writable<string> = setContext("selectedColor", writable("#F1F1F1"));
   let backgroundColor: string = "#1E1E1E";
 
@@ -22,11 +22,12 @@
     $data = [];
   }
 
-  let events: CanvasEvents = {
-    handleDown() {},
-    handleMove() {},
-    handleUp() {},
-  };
+  // let events: CanvasEvents;
+
+  const events: Writable<CanvasEvents> = setContext(
+    "canvas-events",
+    writable({ handleDown: () => {}, handleMove: () => {}, handleUp: () => {} })
+  );
 </script>
 
 <div class="container">
@@ -35,6 +36,7 @@
     <DrawModeButton bind:drawMode mode="FREE">Free Mode</DrawModeButton>
     <DrawModeButton bind:drawMode mode="FREE-LINE">Free Line</DrawModeButton>
     <DrawModeButton bind:drawMode mode="LINE">Line Mode</DrawModeButton>
+    <DrawModeButton bind:drawMode mode="RECTANGLE">Rectangle Mode</DrawModeButton>
     <br />
     <label for="color">
       Color
@@ -46,28 +48,23 @@
     </label>
   </div>
 
+  {#if drawMode === "FREE"}
+    <FreeTool />
+  {:else if drawMode === "LINE"}
+    <LineTool />
+  {:else if drawMode === "FREE-LINE"}
+    <FreeLineTool />
+  {:else if drawMode === "RECTANGLE"}
+    <RectangleTool />
+  {/if}
   <div style="background-color: {backgroundColor}">
-    {#if drawMode === "FREE"}
-      <FreeTool bind:events />
-    {:else if drawMode === "LINE"}
-      <LineTool bind:events />
-    {/if}
-    <Stage
-      config={{ width, height }}
-      bind:handle={$stage}
-      on:mousedown={events.handleDown}
-      on:touchstart={events.handleUp}
-      on:mouseup={events.handleUp}
-      on:touchend={events.handleUp}
-      on:mousemove={events.handleMove}
-      on:touchmove={events.handleMove}
-    >
+    <Canvas events={$events} {width} {height}>
       <Layer>
-        {#each $data as l}
-          <Line config={l} />
+        {#each $data as item}
+          <svelte:component this={item.shape} config={item.config} />
         {/each}
       </Layer>
-    </Stage>
+    </Canvas>
   </div>
 </div>
 

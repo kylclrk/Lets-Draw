@@ -1,24 +1,30 @@
 <script lang="ts">
-  import type { CanvasEvents } from "../types";
+  import type { CanvasEvents, ShapeWithData } from "../types";
   import { getContext } from "svelte";
   import type { Writable } from "svelte/store";
-  import type { LineConfig } from "konva/lib/shapes/Line";
   import { data, stage } from "./stores";
+  import { Line } from "svelte-konva";
 
   const selectedColor = getContext<Writable<string>>("selectedColor");
-  let isPainting: boolean = false;
-  let workingLine: LineConfig;
+  const events = getContext<Writable<CanvasEvents>>("canvas-events");
 
-  export const events: CanvasEvents = {
+  let isPainting: boolean = false;
+  let workingLine: ShapeWithData;
+
+  $events = {
     handleDown() {
       isPainting = true;
       const pos = $stage.getPointerPosition();
 
       workingLine = {
-        draggable: true,
-        stroke: $selectedColor,
-        strokeWidth: 3,
-        points: [pos.x, pos.y, pos.x, pos.y],
+        config: {
+          draggable: true,
+          stroke: $selectedColor,
+          strokeWidth: 3,
+          points: [pos.x, pos.y, pos.x, pos.y],
+        },
+        shape: Line,
+        meta: "It's a line!",
       };
       $data = [...$data, workingLine];
     },
@@ -28,7 +34,7 @@
       }
       const pos = $stage.getPointerPosition();
 
-      workingLine.points = [...workingLine.points.slice(0, 2), pos.x, pos.y];
+      workingLine.config.points = [...workingLine.config.points.slice(0, 2), pos.x, pos.y];
       $data = $data;
     },
     handleUp() {
