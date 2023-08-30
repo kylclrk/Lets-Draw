@@ -27,9 +27,7 @@
     $data = [];
   }
 
-  // let events: CanvasEvents;
-
-  const events: Writable<CanvasEvents> = setContext(
+  setContext<Writable<CanvasEvents>>(
     "canvas-events",
     writable({ handleDown: nothing, handleMove: nothing, handleUp: nothing })
   );
@@ -66,7 +64,7 @@
     <SelectTool />
   {/if}
   <div style="background-color: {backgroundColor}">
-    <Canvas events={$events} {width} {height}>
+    <Canvas {width} {height}>
       <Layer>
         {#each $data as item}
           <svelte:component this={item.shape} config={item.config} />
