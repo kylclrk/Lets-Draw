@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Layer } from "svelte-konva";
+  import { Layer, Transformer } from "svelte-konva";
   import type { CanvasEvents, DrawMode } from "./types";
   import { writable, type Writable } from "svelte/store";
   import { setContext } from "svelte";
@@ -10,13 +10,18 @@
   import FreeLineTool from "./lib/FreeLineTool.svelte";
   import RectangleTool from "./lib/RectangleTool.svelte";
   import Canvas from "./lib/Canvas.svelte";
+  import type Konva from "konva";
+  import SelectTool from "./lib/SelectTool.svelte";
 
+  const nothing = () => {};
   let width: number;
   let height: number;
 
   let drawMode: DrawMode = "LINE";
   let selectedColor: Writable<string> = setContext("selectedColor", writable("#F1F1F1"));
   let backgroundColor: string = "#1E1E1E";
+
+  const transformer: Writable<Konva.Transformer> = setContext("transformer", writable());
 
   function reset() {
     $data = [];
@@ -26,7 +31,7 @@
 
   const events: Writable<CanvasEvents> = setContext(
     "canvas-events",
-    writable({ handleDown: () => {}, handleMove: () => {}, handleUp: () => {} })
+    writable({ handleDown: nothing, handleMove: nothing, handleUp: nothing })
   );
 </script>
 
@@ -37,6 +42,7 @@
     <DrawModeButton bind:drawMode mode="FREE-LINE">Free Line</DrawModeButton>
     <DrawModeButton bind:drawMode mode="LINE">Line Mode</DrawModeButton>
     <DrawModeButton bind:drawMode mode="RECTANGLE">Rectangle Mode</DrawModeButton>
+    <DrawModeButton bind:drawMode mode="SELECT">Select Mode</DrawModeButton>
     <br />
     <label for="color">
       Color
@@ -56,6 +62,8 @@
     <FreeLineTool />
   {:else if drawMode === "RECTANGLE"}
     <RectangleTool />
+  {:else if drawMode === "SELECT"}
+    <SelectTool />
   {/if}
   <div style="background-color: {backgroundColor}">
     <Canvas events={$events} {width} {height}>
@@ -63,6 +71,7 @@
         {#each $data as item}
           <svelte:component this={item.shape} config={item.config} />
         {/each}
+        <Transformer bind:handle={$transformer} />
       </Layer>
     </Canvas>
   </div>
